@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* ── Landing page (LandingPage.tsx) ── */
+/* Soft pulse used by the "IA ativa" indicators; referenced via inline style. */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* The landing was designed at desktop width (max 1200px). These helpers keep
+   its fixed grids from breaking on narrow viewports. */
+@media (max-width: 900px) {
+  .lp-hero-grid { grid-template-columns: 1fr !important; }
+  .lp-hero-title { font-size: 42px !important; }
+  .lp-principles { grid-template-columns: repeat(2, 1fr) !important; }
+  .lp-steps { grid-template-columns: repeat(2, 1fr) !important; }
+  .lp-modules { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 560px) {
+  .lp-hero-title { font-size: 34px !important; }
+  .lp-principles { grid-template-columns: 1fr !important; }
+  .lp-steps { grid-template-columns: 1fr !important; }
+}
