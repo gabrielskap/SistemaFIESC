@@ -1,0 +1,6 @@
+{
+  "name": "ATS Sistema FIESC - Copiloto de Recrutamento",
+  "description": "Copiloto inteligente de recrutamento e seleção para o Sistema FIESC (FIESC, SESI, SENAI, IEL). Auxilia na avaliação de candidatos com aderência à LGPD, não-discriminação e devolutivas automáticas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
