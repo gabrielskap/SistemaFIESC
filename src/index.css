@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* ── App-wide entrance animations ── */
+/* `animate-fadeIn` and `animate-scaleUp` are used across ~9 components but were
+   never defined (Tailwind v4 has no built-in for them), so the effects never
+   played. Defined here as plain utilities so they work regardless of Tailwind. */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease-out both; }
+.animate-scaleUp { animation: scaleUp 0.2s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn, .animate-scaleUp { animation: none; }
+}
+
 /* ── Landing page (LandingPage.tsx) ── */
 /* Soft pulse used by the "IA ativa" indicators; referenced via inline style. */
 @keyframes pulse-soft {

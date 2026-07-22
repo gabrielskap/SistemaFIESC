@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
+import LoginPage from "./auth/LoginPage";
 import PortalLayout from "./components/PortalLayout";
 import ConsolePage from "./pages/ConsolePage";
 import ProcessosPage from "./pages/ProcessosPage";
@@ -15,6 +16,9 @@ export default function App() {
       <Routes>
         {/* Public landing page */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Public auth screen */}
+        <Route path="/login" element={<LoginPage />} />
 
         {/* Internal portal — shared app-shell layout, top-level slugs */}
         <Route element={<PortalLayout />}>

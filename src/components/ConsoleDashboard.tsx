@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Vaga } from "../types";
-import { Briefcase, Users, Clock, CheckCircle2, Search, Filter, RefreshCw, BarChart3, Building } from "lucide-react";
+import { entityPill } from "../lib/entityTheme";
+import { Briefcase, Users, Clock, CheckCircle2, Search, BarChart3, Building } from "lucide-react";
 
 interface ConsoleDashboardProps {
   vagas: Vaga[];
@@ -11,22 +12,6 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
   const [selectedEntidade, setSelectedEntidade] = useState<string>("TODAS");
   const [selectedRegional, setSelectedRegional] = useState<string>("TODAS");
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // FIESC Entities helper for colors
-  const getEntityStyle = (entidade: string) => {
-    switch (entidade) {
-      case "SESI":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "SENAI":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "IEL":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "FIESC":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
-    }
-  };
 
   // Extract unique regionals
   const regionaisList = ["TODAS", ...Array.from(new Set(vagas.map((v) => v.regional)))];
@@ -227,7 +212,7 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
                         {v.titulo}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${getEntityStyle(v.entidade)}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${entityPill(v.entidade)}`}>
                           {v.entidade}
                         </span>
                       </td>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avaliacao, Candidato, Vaga } from "../types";
-import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Mail, Copy, Check, FileJson, FileText, Sparkles, AlertOctagon } from "lucide-react";
+import { CheckCircle2, XCircle, ShieldCheck, Mail, Copy, Check, FileJson, FileText, Sparkles, AlertOctagon } from "lucide-react";
 
 interface AvaliacaoVisualizerProps {
   avaliacao: Avaliacao;

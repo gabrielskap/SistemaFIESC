@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Vaga, Candidato } from "../types";
-import { Search, MapPin, Briefcase, FileCheck, Check, Sparkles, Building, ChevronRight, UserPlus } from "lucide-react";
+import { entityPill } from "../lib/entityTheme";
+import { Search, MapPin, Check, Sparkles, Building, ChevronRight, UserPlus } from "lucide-react";
 
 interface MicrositeVagasProps {
   vagas: Vaga[];
@@ -19,22 +20,6 @@ export default function MicrositeVagas({ vagas, candidatos, onApply, appliedMap 
   const [applyingVaga, setApplyingVaga] = useState<Vaga | null>(null);
   const [selectedSimulatedCand, setSelectedSimulatedCand] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
-  // Style helper for entities
-  const getEntityStyle = (entidade: string) => {
-    switch (entidade) {
-      case "SESI":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "SENAI":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "IEL":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "FIESC":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
-    }
-  };
 
   // Extract unique regions
   const regionaisList = ["TODAS", ...Array.from(new Set(vagas.map((v) => v.regional)))];
@@ -184,7 +169,7 @@ export default function MicrositeVagas({ vagas, candidatos, onApply, appliedMap 
                 <div className="space-y-3.5">
                   {/* Entity and location */}
                   <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-0.5 rounded text-[9px] font-extrabold border uppercase tracking-wider ${getEntityStyle(v.entidade)}`}>
+                    <span className={`px-2.5 py-0.5 rounded text-[9px] font-extrabold border uppercase tracking-wider ${entityPill(v.entidade)}`}>
                       {v.entidade}
                     </span>
                     <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5 capitalize">

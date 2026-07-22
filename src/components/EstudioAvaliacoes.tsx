@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Vaga, Candidato, Questao, Prova, CorrecaoQuestao, ResultadoIntegridade } from "../types";
-import { Sparkles, Brain, ClipboardCheck, ShieldAlert, CheckCircle, AlertTriangle, HelpCircle, FileText, RefreshCw, Send, ArrowRight, UserCheck, AlertOctagon, Copy, Check } from "lucide-react";
+import { Sparkles, Brain, ClipboardCheck, ShieldAlert, CheckCircle, AlertTriangle, RefreshCw, UserCheck, AlertOctagon, Copy, Check } from "lucide-react";
 
 interface EstudioAvaliacoesProps {
   vaga: Vaga | null;

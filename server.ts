@@ -3,6 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { GEMINI_MODEL } from "./server/ai/model";
 
 dotenv.config();
 
@@ -73,7 +74,7 @@ function computeWeightedScore(candidateDesc: string, vaga: VagaRequisitos) {
     maxPossibleWeight += pesoEfetivo;
     
     // Simple heuristic synonym dictionary for robust local matching
-    const keywords = req.criterio.toLowerCase().split(/[\s,()\/]+/).filter(w => w.length > 3);
+    const keywords = req.criterio.toLowerCase().split(/[\s,()/]+/).filter(w => w.length > 3);
     const isMet = keywords.some(kw => textToSearch.includes(kw)) || textToSearch.includes(req.criterio.toLowerCase());
     
     if (isMet) {
@@ -93,7 +94,7 @@ function computeWeightedScore(candidateDesc: string, vaga: VagaRequisitos) {
     const pesoEfetivo = req.peso || 3;
     maxPossibleWeight += pesoEfetivo;
     
-    const keywords = req.criterio.toLowerCase().split(/[\s,()\/]+/).filter(w => w.length > 3);
+    const keywords = req.criterio.toLowerCase().split(/[\s,()/]+/).filter(w => w.length > 3);
     const isMet = keywords.some(kw => textToSearch.includes(kw)) || textToSearch.includes(req.criterio.toLowerCase());
     
     if (isMet) {
@@ -136,13 +137,6 @@ app.post("/api/evaluate", async (req, res) => {
     const results = candidatos.map((cand) => {
       const cvText = `${cand.nome} ${cand.experiencia} ${cand.formacao} ${(cand.habilidades || []).join(" ")}`.toLowerCase();
       const localEval = computeWeightedScore(cvText, vaga);
-      
-      const entidadeLabels: Record<string, string> = {
-        SENAI: "SENAI (Profissional)",
-        SESI: "SESI (Saúde e Segurança)",
-        IEL: "IEL (Estágio)",
-        FIESC: "FIESC Corporativo"
-      };
 
       const devText = `O candidato ${cand.nome} obteve um score de ${localEval.score_aderencia}% na avaliação ponderada para a vaga de ${vaga.cargo || vaga.titulo || "Analista"}. ${
         localEval.atende_requisitos_obrigatorios 
@@ -228,7 +222,7 @@ Retorne um JSON válido com a seguinte estrutura exata:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -345,7 +339,7 @@ Estrutura do JSON esperado:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -406,8 +400,8 @@ app.post("/api/assessments/correct", async (req, res) => {
   if (!ai) {
     // Correção local rápida
     const isObjective = questao.tipo === "objetiva";
-    let score = 0;
-    let comments = "";
+    let score: number;
+    let comments: string;
 
     if (isObjective) {
       const gbr = gabarito_ou_rubrica || questao.gabarito || "B";
@@ -461,7 +455,7 @@ Retorne um JSON válido contendo:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -573,7 +567,7 @@ Retorne um JSON válido:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -657,7 +651,7 @@ Sua resposta DEVE ser estritamente em formato JSON válido que atenda a essa est
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -702,7 +696,7 @@ app.post("/api/generate-message", async (req, res) => {
   if (!ai) {
     const entidadeName = vaga.entidade || "Sistema FIESC";
     const saudar = `Olá ${candidato.nome},\n\n`;
-    let mensagem = "";
+    let mensagem: string;
     if (recomendacao === "avancar") {
       mensagem = `Temos o prazer de informar que o seu perfil apresentou excelente aderência para a vaga de ${vaga.cargo || vaga.titulo} no ${entidadeName} (${vaga.regional}). Você avançou para a próxima etapa de entrevistas. Nossa equipe entrará em contato em breve para agendar.\n\nAgradecemos seu interesse em fazer parte do desenvolvimento da indústria catarinense!\n\nAtenciosamente,\nRecrutamento & Seleção ${entidadeName}`;
     } else if (recomendacao === "revisar_manual") {
@@ -741,7 +735,7 @@ Gere apenas o texto final da mensagem (e-mail ou carta) para que o recrutador po
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
     });
 

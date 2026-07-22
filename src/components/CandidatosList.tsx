@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Candidato } from "../types";
-import { User, ShieldCheck, Mail, Phone, Award, Brain, Clock, Plus, X, Sparkles, AlertTriangle } from "lucide-react";
+import { User, ShieldCheck, Mail, Phone, Plus, X, Sparkles } from "lucide-react";
 
 interface CandidatosListProps {
   candidatos: Candidato[];

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Vaga, Entidade } from "../types";
+import { entityTheme } from "../lib/entityTheme";
 import { Search, Plus, Sparkles, AlertTriangle, CheckCircle, ShieldAlert, X, HelpCircle } from "lucide-react";
 
 interface VagasListProps {
@@ -36,60 +37,6 @@ export default function VagasList({ vagas, selectedVaga, onSelectVaga, onAddVaga
     const matchesEntidade = selectedEntidadeFilter === "TODAS" || vaga.entidade === selectedEntidadeFilter;
     return matchesSearch && matchesEntidade;
   });
-
-  const getEntityStyle = (entidade: Entidade) => {
-    switch (entidade) {
-      case "SENAI":
-        return {
-          bg: "bg-red-50 text-red-700 border-red-200",
-          badge: "bg-red-100 text-red-800",
-          borderSelected: "border-red-500 ring-2 ring-red-100",
-          color: "text-red-600",
-          accentBg: "bg-red-600",
-          accentText: "text-red-500",
-        };
-      case "SESI":
-        return {
-          bg: "bg-blue-50 text-blue-700 border-blue-200",
-          badge: "bg-blue-100 text-blue-800",
-          borderSelected: "border-blue-500 ring-2 ring-blue-100",
-          color: "text-blue-600",
-          accentBg: "bg-blue-600",
-          accentText: "text-blue-500",
-        };
-      case "IEL":
-        return {
-          bg: "bg-amber-50 text-amber-800 border-amber-200",
-          badge: "bg-amber-100 text-amber-900",
-          borderSelected: "border-amber-500 ring-2 ring-amber-100",
-          color: "text-amber-600",
-          accentBg: "bg-amber-500",
-          accentText: "text-amber-500",
-        };
-      case "FIESC":
-        return {
-          bg: "bg-slate-50 text-slate-700 border-slate-200",
-          badge: "bg-slate-200 text-slate-800",
-          borderSelected: "border-slate-800 ring-2 ring-slate-100",
-          color: "text-slate-800",
-          accentBg: "bg-slate-800",
-          accentText: "text-slate-800",
-        };
-    }
-  };
-
-  const getEntitySpecialty = (entidade: Entidade) => {
-    switch (entidade) {
-      case "SENAI":
-        return "Educação profissional, docente e inovação tecnológica.";
-      case "SESI":
-        return "Saúde ocupacional, segurança do trabalho e educação básica.";
-      case "IEL":
-        return "Estágio, Jovem Aprendiz e desenvolvimento de carreira.";
-      case "FIESC":
-        return "Representação de mercado e rotinas institucionais da indústria.";
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,7 +260,7 @@ export default function VagasList({ vagas, selectedVaga, onSelectVaga, onAddVaga
           </div>
         ) : (
           filteredVagas.map((vaga) => {
-            const styles = getEntityStyle(vaga.entidade);
+            const styles = entityTheme(vaga.entidade);
             const isSelected = selectedVaga?.id === vaga.id;
             return (
               <div
@@ -419,13 +366,13 @@ export default function VagasList({ vagas, selectedVaga, onSelectVaga, onAddVaga
 
       {/* Explanatory Info Card based on selected vacancy entity */}
       {selectedVaga && (
-        <div className={`mt-4 p-3 rounded-xl border border-dashed transition duration-300 ${getEntityStyle(selectedVaga.entidade).bg}`}>
+        <div className={`mt-4 p-3 rounded-xl border border-dashed transition duration-300 ${entityTheme(selectedVaga.entidade).pill}`}>
           <div className="flex items-center gap-1.5 mb-1 font-bold text-xs uppercase tracking-wider">
             <HelpCircle className="w-4 h-4" />
             <span>Foco da {selectedVaga.entidade}</span>
           </div>
           <p className="text-[10px] leading-relaxed opacity-90">
-            {getEntitySpecialty(selectedVaga.entidade)} Toda avaliação deste processo foca estritamente nessas particularidades.
+            {entityTheme(selectedVaga.entidade).specialty} Toda avaliação deste processo foca estritamente nessas particularidades.
           </p>
         </div>
       )}

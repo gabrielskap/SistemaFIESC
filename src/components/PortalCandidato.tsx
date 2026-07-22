@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Vaga, Candidato } from "../types";
-import { HelpCircle, CheckCircle, Clock, Calendar, ChevronRight, UserCheck, ShieldAlert } from "lucide-react";
+import { entityPill } from "../lib/entityTheme";
+import { CheckCircle, Clock, Calendar } from "lucide-react";
 
 interface PortalCandidatoProps {
   vagas: Vaga[];
@@ -91,21 +92,6 @@ export default function PortalCandidato({ vagas, candidatos, appliedMap }: Porta
     { label: "Entrevista", stepNum: 3 },
     { label: "Aprovado/Fim", stepNum: 4 }
   ];
-
-  const getEntityStyle = (entidade: string) => {
-    switch (entidade) {
-      case "SESI":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "SENAI":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "IEL":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "FIESC":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
-    }
-  };
 
   return (
     <div className="space-y-6 animate-fadeIn" id="portal_candidato_view">
@@ -198,7 +184,7 @@ export default function PortalCandidato({ vagas, candidatos, appliedMap }: Porta
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
                     <div className="space-y-0.5">
-                      <span className={`px-2 py-0.5 rounded text-[8.5px] font-extrabold border uppercase tracking-wider ${getEntityStyle(vaga.entidade)}`}>
+                      <span className={`px-2 py-0.5 rounded text-[8.5px] font-extrabold border uppercase tracking-wider ${entityPill(vaga.entidade)}`}>
                         {vaga.entidade}
                       </span>
                       <h4 className="text-sm font-bold text-slate-900 mt-1">{vaga.titulo}</h4>

@@ -1,5 +1,6 @@
 import { useState, useEffect, CSSProperties } from "react";
-import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../auth/authContext";
 import {
   Briefcase, FileCheck2, Sparkles, Layers, Award,
   ChevronRight, LayoutDashboard, Settings, Shield, User, Menu, X,
@@ -42,6 +43,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export default function PortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { authDisabled, loading: authLoading, session } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // On mobile the sidebar becomes a fixed slide-in drawer; on desktop it is a
@@ -130,6 +132,22 @@ export default function PortalLayout() {
         transition: "transform 0.2s ease",
       }
     : {};
+
+  // Gate de login (Supabase). Inativo enquanto o Supabase não está configurado,
+  // então a demo segue acessível. Sem ProtectedRoute: o próprio layout do portal
+  // é o ponto único de verificação para todas as rotas internas.
+  if (!authDisabled) {
+    if (authLoading) {
+      return (
+        <div className="h-screen flex items-center justify-center bg-slate-900 text-slate-300 text-sm">
+          Carregando sessão…
+        </div>
+      );
+    }
+    if (!session) {
+      return <Navigate to="/login" replace />;
+    }
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-50 font-sans text-slate-800" id="main_app_wrapper">

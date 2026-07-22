@@ -124,7 +124,7 @@ export default function LandingPage() {
                 </span>
                 <div>
                   <span style={{ display: "block", fontWeight: 700, fontSize: 14, color: "#f8fafc" }}>IA Inteligente Ativa</span>
-                  <span style={{ display: "block", fontSize: 13, color: "#94a3b8", marginTop: 2 }}>Baseada em modelos Gemini 3.5</span>
+                  <span style={{ display: "block", fontSize: 13, color: "#94a3b8", marginTop: 2 }}>Baseada em IA generativa Google Gemini</span>
                 </div>
               </div>
               <div style={{ background: "linear-gradient(160deg,rgba(37,99,235,0.18),rgba(124,58,237,0.14))", border: "1px solid rgba(148,163,184,0.25)", borderRadius: 16, padding: 22, aspectRatio: "4/3", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 10, textAlign: "center" }}>

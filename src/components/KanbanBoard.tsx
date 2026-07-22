@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Vaga, Candidato } from "../types";
-import { ArrowLeft, ArrowRight, UserCheck, HelpCircle, Layers, ShieldCheck } from "lucide-react";
+import { entityPill } from "../lib/entityTheme";
+import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
 
 interface KanbanBoardProps {
   vagas: Vaga[];
@@ -97,21 +98,6 @@ export default function KanbanBoard({ vagas, candidatos }: KanbanBoardProps) {
     return nome.slice(0, 2).toUpperCase();
   };
 
-  const getEntityStyle = (entidade: string) => {
-    switch (entidade) {
-      case "SESI":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "SENAI":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "IEL":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "FIESC":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
-    }
-  };
-
   const columns: { title: string; stage: KanbanCard["etapa"]; color: string }[] = [
     { title: "Inscritos", stage: "Inscritos", color: "border-t-blue-500 bg-blue-50/10" },
     { title: "Triagem Técnica", stage: "Triagem", color: "border-t-indigo-500 bg-indigo-50/10" },
@@ -129,7 +115,7 @@ export default function KanbanBoard({ vagas, candidatos }: KanbanBoardProps) {
           <h2 className="text-base font-bold text-slate-900 uppercase">Quadro Kanban por Processo Seletivo</h2>
           {activeVaga && (
             <div className="flex items-center gap-2 mt-1">
-              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${getEntityStyle(activeVaga.entidade)}`}>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${entityPill(activeVaga.entidade)}`}>
                 {activeVaga.entidade}
               </span>
               <span className="text-xs text-slate-500 capitalize">
@@ -188,8 +174,7 @@ export default function KanbanBoard({ vagas, candidatos }: KanbanBoardProps) {
                 {colCards.length > 0 ? (
                   colCards.map((card) => {
                     const initials = getInitials(card.nome);
-                    const isBest = card.score >= 80;
-                    
+
                     return (
                       <div
                         key={card.id}
