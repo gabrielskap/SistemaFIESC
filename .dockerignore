@@ -1,0 +1,31 @@
+# Dependências e artefatos — reconstruídos dentro da imagem
+node_modules
+dist
+build
+coverage
+
+# Segredos — NUNCA entram na imagem. As variáveis vêm do painel do EasyPanel.
+.env
+.env.*
+!.env.example
+
+# Controle de versão / editor
+.git
+.gitignore
+.claude
+.vscode
+.idea
+
+# Docs e configs que não afetam o build
+*.md
+!README.md
+.prettierrc
+.prettierignore
+eslint.config.js
+Dockerfile
+.dockerignore
+
+# Logs e temporários
+*.log
+npm-debug.log*
+.DS_Store

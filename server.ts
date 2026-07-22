@@ -1,16 +1,23 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { GEMINI_MODEL } from "./server/ai/model";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+// A plataforma de deploy (EasyPanel/Docker) injeta a porta via env.
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+
+// Healthcheck — usado pelo Docker/EasyPanel para saber se o container subiu.
+// Responde antes de qualquer dependência externa (Supabase/Gemini) para que o
+// container seja considerado saudável mesmo com integrações não configuradas.
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
+});
 
 // Lazy-loaded Gemini client to prevent startup crashes if GEMINI_API_KEY is missing
 let aiClient: GoogleGenAI | null = null;
@@ -749,6 +756,10 @@ Gere apenas o texto final da mensagem (e-mail ou carta) para que o recrutador po
 // Serve frontend assets and start listening
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    // Import dinâmico de propósito: `vite` é devDependency e não existe na
+    // imagem de produção (instalada com --omit=dev). Carregar no topo faria o
+    // container quebrar no boot.
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

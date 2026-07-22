@@ -37,6 +37,12 @@ Scripts:
 | `npm run start` | Executa o build de produção (`node dist/server.cjs`) |
 | `npm run lint` | Type-check (`tsc --noEmit`) |
 
+## Deploy
+
+Container único (Express serve API + `dist/`), via `Dockerfile` na raiz.
+Passo a passo do EasyPanel — build args vs. variáveis de runtime, porta e
+healthcheck — em [`DEPLOY.md`](./DEPLOY.md).
+
 ## Variáveis de ambiente
 
 Definidas em `.env` (veja `.env.example` para a lista completa e comentários):
