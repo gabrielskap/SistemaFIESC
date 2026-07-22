@@ -12,6 +12,8 @@ export interface PortalContextValue {
   selectedVaga: Vaga | null;
   selectedCandidato: Candidato | null;
   appliedMap: Record<string, string[]>;
+  /** true enquanto os dados carregam do Supabase (modo demo é sempre false). */
+  loading: boolean;
   setSelectedVaga: Dispatch<SetStateAction<Vaga | null>>;
   setSelectedCandidato: Dispatch<SetStateAction<Candidato | null>>;
   handleSelectVaga: (vaga: Vaga) => void;

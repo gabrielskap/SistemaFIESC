@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "db:seed:users": "tsx scripts/seed-users.ts",
+    "db:check": "tsx scripts/check-db.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

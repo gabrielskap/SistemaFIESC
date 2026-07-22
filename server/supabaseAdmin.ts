@@ -11,8 +11,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * servidor suba mesmo sem Supabase (endpoints de IA seguem funcionando com o
  * fallback local). Sempre verifique `if (supabaseAdmin) { ... }` antes de usar.
  */
-const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// URL não é segredo — usa a mesma do front (VITE_SUPABASE_URL) para evitar
+// duplicação no .env. SUPABASE_URL é só um override opcional.
+const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+// Aceita o nome padrão do self-hosted (SERVICE_ROLE_KEY) como fallback.
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY;
 
 export const supabaseAdmin: SupabaseClient | null =
   url && serviceKey

@@ -6,7 +6,7 @@ import {
   ChevronRight, LayoutDashboard, Settings, Shield, User, Menu, X,
 } from "lucide-react";
 import { Vaga, Candidato } from "../types";
-import { initialVagas, initialCandidatos } from "../data/seedData";
+import { usePortalData } from "../data/usePortalData";
 import { PortalContextValue } from "../portal/portalContext";
 
 type LucideIcon = typeof LayoutDashboard;
@@ -64,51 +64,42 @@ export default function PortalLayout() {
     ? "candidato"
     : "recrutador";
 
-  // ── Shared portal state (moved from the old App monolith) ──
-  const [vagas, setVagas] = useState<Vaga[]>(initialVagas);
-  const [candidatos, setCandidatos] = useState<Candidato[]>(initialCandidatos);
-  const [selectedVaga, setSelectedVaga] = useState<Vaga | null>(initialVagas[0]);
-  const [selectedCandidato, setSelectedCandidato] = useState<Candidato | null>(initialCandidatos[0]);
-  const [appliedMap, setAppliedMap] = useState<Record<string, string[]>>({
-    cand_1: ["vaga_senai_1"],
-    cand_2: ["vaga_sesi_1"],
-    cand_3: ["vaga_iel_1"],
-    cand_4: ["vaga_fiesc_1"],
-    cand_5: ["vaga_senai_2"],
-  });
+  // ── Dados do portal: Supabase (com RLS) ou seed em memória (demo) ──
+  const {
+    vagas,
+    candidatos,
+    appliedMap,
+    loading,
+    handleAddVaga: addVaga,
+    handleAddCandidato: addCandidato,
+    handleApply,
+  } = usePortalData();
+
+  // A seleção é estado de UI local; sincroniza com o 1º item quando os dados chegam.
+  const [selectedVaga, setSelectedVaga] = useState<Vaga | null>(null);
+  const [selectedCandidato, setSelectedCandidato] = useState<Candidato | null>(null);
+  useEffect(() => {
+    setSelectedVaga((cur) => cur ?? vagas[0] ?? null);
+  }, [vagas]);
+  useEffect(() => {
+    setSelectedCandidato((cur) => cur ?? candidatos[0] ?? null);
+  }, [candidatos]);
 
   const handleSelectVaga = (vaga: Vaga) => setSelectedVaga(vaga);
   const handleSelectCandidato = (candidato: Candidato) => setSelectedCandidato(candidato);
 
-  const handleAddVaga = (data: Omit<Vaga, "id" | "dataCriacao">) => {
-    const newVaga: Vaga = {
-      ...data,
-      id: `vaga_${Date.now()}`,
-      dataCriacao: new Date().toISOString().split("T")[0],
-    };
-    setVagas((prev) => [newVaga, ...prev]);
-    setSelectedVaga(newVaga);
+  // Criar também seleciona o novo item (preserva a UX anterior).
+  const handleAddVaga = async (data: Omit<Vaga, "id" | "dataCriacao">) => {
+    const v = await addVaga(data);
+    if (v) setSelectedVaga(v);
   };
-
-  const handleAddCandidato = (data: Omit<Candidato, "id" | "dataCandidatura">) => {
-    const newCand: Candidato = {
-      ...data,
-      id: `cand_${Date.now()}`,
-      dataCandidatura: new Date().toISOString().split("T")[0],
-    };
-    setCandidatos((prev) => [newCand, ...prev]);
-    setSelectedCandidato(newCand);
-  };
-
-  const handleApply = (vagaId: string, candidatoId: string) => {
-    setAppliedMap((prev) => ({
-      ...prev,
-      [candidatoId]: Array.from(new Set([...(prev[candidatoId] || []), vagaId])),
-    }));
+  const handleAddCandidato = async (data: Omit<Candidato, "id" | "dataCandidatura">) => {
+    const c = await addCandidato(data);
+    if (c) setSelectedCandidato(c);
   };
 
   const portal: PortalContextValue = {
-    vagas, candidatos, selectedVaga, selectedCandidato, appliedMap,
+    vagas, candidatos, selectedVaga, selectedCandidato, appliedMap, loading,
     setSelectedVaga, setSelectedCandidato,
     handleSelectVaga, handleSelectCandidato, handleAddVaga, handleAddCandidato, handleApply,
   };

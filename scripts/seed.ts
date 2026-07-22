@@ -11,12 +11,15 @@ import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
 import { initialVagas, initialCandidatos } from "../src/data/seedData";
 
-const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// URL não é segredo — usa a mesma do front (VITE_SUPABASE_URL) para evitar
+// duplicação no .env. SUPABASE_URL é só um override opcional.
+const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+// Aceita o nome padrão do self-hosted (SERVICE_ROLE_KEY) como fallback.
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY;
 
 if (!url || !serviceKey) {
   console.error(
-    "Faltam SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY no .env. Veja .env.example."
+    "Faltam VITE_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (ou SERVICE_ROLE_KEY) no .env. Veja .env.example."
   );
   process.exit(1);
 }
