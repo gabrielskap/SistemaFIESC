@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import {
-  Sparkles, Layers, BarChart3, HelpCircle, ChevronRight, Check, Copy, FileCheck2,
+  Sparkles, Layers, BarChart3, HelpCircle, ChevronRight, Check, Copy, FileCheck2, AlertTriangle,
 } from "lucide-react";
 import VagasList from "../components/VagasList";
 import CandidatosList from "../components/CandidatosList";
 import AvaliacaoVisualizer from "../components/AvaliacaoVisualizer";
 import { Vaga, Candidato, Avaliacao } from "../types";
 import { usePortal } from "../portal/portalContext";
+import { apiFetch } from "../lib/apiFetch";
 
 const loadingMessages = [
   "Iniciando motor de correspondência cognitiva...",
@@ -22,7 +23,9 @@ const formatVagaForApi = (vaga: Vaga) => ({
   ...vaga,
   requisitos_obrigatorios: vaga.requisitos_obrigatorios.map((req, idx) => ({
     criterio: req,
-    eliminatorio: true,
+    // Só o 1º obrigatório é eliminatório por padrão (evita que um único
+    // falso-negativo do matching rebaixe todo mundo para "não recomendado").
+    eliminatorio: idx === 0,
     peso: 5 - Math.min(idx, 2),
   })),
   requisitos_desejaveis: vaga.requisitos_desejaveis.map((req, idx) => ({
@@ -48,6 +51,9 @@ export default function TriagemPage() {
   const [batchResults, setBatchResults] = useState<any[] | null>(null);
   const [showBatchRawJson, setShowBatchRawJson] = useState(false);
   const [copiedBatchJson, setCopiedBatchJson] = useState(false);
+
+  // Erro de API exibido inline (substitui os alert() anteriores).
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -87,17 +93,19 @@ export default function TriagemPage() {
     setIsEvaluating(true);
     setAvaliacao(null);
     setBatchResults(null);
+    setError(null);
     try {
-      const response = await fetch("/api/evaluate", {
+      const response = await apiFetch("/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ candidato: candidate, vaga: formatVagaForApi(selectedVaga) }),
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setAvaliacao(data);
     } catch (err) {
       console.error(err);
-      alert("Ocorreu um erro ao realizar a avaliação técnica.");
+      setError("Não foi possível concluir a avaliação técnica. Verifique sua sessão e tente novamente.");
     } finally {
       setIsEvaluating(false);
     }
@@ -108,19 +116,21 @@ export default function TriagemPage() {
     setIsBatchEvaluating(true);
     setBatchResults(null);
     setAvaliacao(null);
+    setError(null);
     try {
-      const response = await fetch("/api/evaluate", {
+      const response = await apiFetch("/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ candidatos: candidatos, vaga: formatVagaForApi(selectedVaga) }),
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (data.resultados) {
         setBatchResults(data.resultados);
       }
     } catch (err) {
       console.error(err);
-      alert("Ocorreu um erro ao processar a triagem em lote.");
+      setError("Não foi possível processar a triagem em lote. Verifique sua sessão e tente novamente.");
     } finally {
       setIsBatchEvaluating(false);
     }
@@ -180,6 +190,12 @@ export default function TriagemPage() {
 
       {/* Right block - Outputs of AI Evaluation */}
       <div className="lg:col-span-4 flex flex-col justify-start h-full">
+        {error && (
+          <div className="mb-4 flex items-start gap-2 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg p-3">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
         {isEvaluating ? (
           <div className="bg-white rounded-xl shadow-md border border-slate-200 p-8 flex flex-col items-center justify-center text-center space-y-6 h-full min-h-[400px]">
             <div className="relative flex items-center justify-center">

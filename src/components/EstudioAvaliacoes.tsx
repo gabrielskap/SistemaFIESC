@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Vaga, Candidato, Questao, Prova, CorrecaoQuestao, ResultadoIntegridade } from "../types";
 import { Sparkles, Brain, ClipboardCheck, ShieldAlert, CheckCircle, AlertTriangle, RefreshCw, UserCheck, AlertOctagon, Copy, Check } from "lucide-react";
+import { apiFetch } from "../lib/apiFetch";
 
 interface EstudioAvaliacoesProps {
   vaga: Vaga | null;
@@ -33,6 +34,9 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
   // Clipboard copies
   const [copiedJson, setCopiedJson] = useState<string | null>(null);
 
+  // Erro de API exibido inline (substitui os alert() anteriores).
+  const [error, setError] = useState<string | null>(null);
+
   // Synchronize with active vacancy/candidate selection
   useEffect(() => {
     if (vaga) {
@@ -54,6 +58,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
     setSelectedQuestao(null);
     setCorrecao(null);
     setIntegridade(null);
+    setError(null);
 
     const competenciesArray = competencias
       .split(",")
@@ -66,7 +71,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
     }
 
     try {
-      const response = await fetch("/api/assessments/generate", {
+      const response = await apiFetch("/api/assessments/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,6 +83,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
           contexto_curriculo: cvText
         })
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setProva(data);
       if (data.questoes && data.questoes.length > 0) {
@@ -87,7 +93,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao conectar com a API de geração de questões.");
+      setError("Não foi possível gerar as questões. Verifique sua sessão e tente novamente.");
     } finally {
       setIsGenerating(false);
     }
@@ -116,9 +122,10 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
     if (!selectedQuestao) return;
     setIsCorrecting(true);
     setCorrecao(null);
+    setError(null);
 
     try {
-      const response = await fetch("/api/assessments/correct", {
+      const response = await apiFetch("/api/assessments/correct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -127,11 +134,12 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
           gabarito_ou_rubrica: selectedQuestao.tipo === "objetiva" ? selectedQuestao.gabarito : selectedQuestao.rubrica
         })
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setCorrecao(data);
     } catch (err) {
       console.error(err);
-      alert("Erro ao realizar correção automática.");
+      setError("Não foi possível corrigir a resposta. Verifique sua sessão e tente novamente.");
     } finally {
       setIsCorrecting(false);
     }
@@ -142,6 +150,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
     if (!respostaCandidato) return;
     setIsCheckingIntegrity(true);
     setIntegridade(null);
+    setError(null);
 
     // Mock other responses for plagiarism detection purposes (e.g., exact copy match trigger)
     const otherResponses = [
@@ -150,7 +159,7 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
     ];
 
     try {
-      const response = await fetch("/api/assessments/integrity", {
+      const response = await apiFetch("/api/assessments/integrity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,11 +167,12 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
           respostas_outros_candidatos: otherResponses
         })
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setIntegridade(data);
     } catch (err) {
       console.error(err);
-      alert("Erro ao analisar integridade da resposta.");
+      setError("Não foi possível auditar a integridade. Verifique sua sessão e tente novamente.");
     } finally {
       setIsCheckingIntegrity(false);
     }
@@ -193,6 +203,13 @@ export default function EstudioAvaliacoes({ vaga, candidato }: EstudioAvaliacoes
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="estudio_avaliacoes_main">
+      {error && (
+        <div className="lg:col-span-12 flex items-start gap-2 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg p-3">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Configuration Column */}
       <div className="lg:col-span-4 bg-white rounded-xl shadow-md border border-slate-200 p-5 space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100">

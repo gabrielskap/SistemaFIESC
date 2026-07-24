@@ -1,6 +1,6 @@
 import { useState, useEffect, CSSProperties } from "react";
 import { Outlet, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../auth/authContext";
+import { useAuth, type AppRole } from "../auth/authContext";
 import {
   Briefcase, FileCheck2, Sparkles, Layers, Award,
   ChevronRight, LayoutDashboard, Settings, Shield, User, Menu, X,
@@ -33,6 +33,24 @@ const candidatoModules: ModuleItem[] = [
 
 const candidatoPaths = candidatoModules.map((m) => m.to);
 
+// Autorização por papel (aplicada quando o Supabase está configurado).
+const recrutadorOnlyPaths = ["/console", "/processos", "/triagem", "/estudio"];
+const adminOnlyPaths = ["/administracao"];
+
+/** admin acessa tudo; recrutador acessa painel + microsite; candidato só o portal. */
+function isPathAllowed(pathname: string, role: AppRole): boolean {
+  if (role === "admin") return true;
+  if (adminOnlyPaths.includes(pathname)) return false;
+  if (candidatoPaths.includes(pathname)) return role === "candidato" || role === "recrutador";
+  if (recrutadorOnlyPaths.includes(pathname)) return role === "recrutador";
+  return true;
+}
+
+/** Rota inicial padrão de cada papel (destino do redirect em acesso indevido). */
+function homeForRole(role: AppRole): string {
+  return role === "candidato" ? "/vagas" : "/console";
+}
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `w-full text-left text-xs font-bold px-3 py-2.5 rounded-lg flex items-center gap-2.5 transition cursor-pointer border-l-4 ${
     isActive
@@ -43,7 +61,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export default function PortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { authDisabled, loading: authLoading, session } = useAuth();
+  const { authDisabled, loading: authLoading, session, role: userRole, profileLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // On mobile the sidebar becomes a fixed slide-in drawer; on desktop it is a
@@ -104,6 +122,8 @@ export default function PortalLayout() {
     handleSelectVaga, handleSelectCandidato, handleAddVaga, handleAddCandidato, handleApply,
   };
 
+  // Em auth real, um candidato não pode alternar para o painel do recrutador.
+  const canSeeRecruiter = authDisabled || userRole === "recrutador" || userRole === "admin";
   const modules = role === "recrutador" ? recrutadorModules : candidatoModules;
 
   const goTo = (to: string) => {
@@ -137,6 +157,18 @@ export default function PortalLayout() {
     }
     if (!session) {
       return <Navigate to="/login" replace />;
+    }
+    if (profileLoading) {
+      return (
+        <div className="h-screen flex items-center justify-center bg-slate-900 text-slate-300 text-sm">
+          Carregando perfil…
+        </div>
+      );
+    }
+    // Menor privilégio: sem profile → trata como candidato (default do banco).
+    const effectiveRole: AppRole = userRole ?? "candidato";
+    if (!isPathAllowed(location.pathname, effectiveRole)) {
+      return <Navigate to={homeForRole(effectiveRole)} replace />;
     }
   }
 
@@ -192,15 +224,17 @@ export default function PortalLayout() {
             <div className="space-y-2">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Acesso de Painel</label>
               <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1">
-                <button
-                  onClick={() => goTo("/console")}
-                  className={`flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
-                    role === "recrutador" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                  }`}
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  Recrutador
-                </button>
+                {canSeeRecruiter && (
+                  <button
+                    onClick={() => goTo("/console")}
+                    className={`flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                      role === "recrutador" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                    }`}
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    Recrutador
+                  </button>
+                )}
                 <button
                   onClick={() => goTo("/vagas")}
                   className={`flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${

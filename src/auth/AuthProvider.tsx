@@ -14,6 +14,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -43,16 +44,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const uid = session?.user?.id;
     if (!isSupabaseConfigured || !uid) {
       setProfile(null);
+      setProfileLoading(false);
       return;
     }
     let active = true;
+    setProfileLoading(true);
     supabase
       .from("profiles")
       .select("id, nome, role, entidade")
       .eq("id", uid)
       .single()
       .then(({ data }) => {
-        if (active) setProfile((data as Profile | null) ?? null);
+        if (!active) return;
+        setProfile((data as Profile | null) ?? null);
+        setProfileLoading(false);
       });
     return () => {
       active = false;
@@ -62,6 +67,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       loading,
+      profileLoading,
       authDisabled: !isSupabaseConfigured,
       session,
       user: session?.user ?? null,
@@ -83,7 +89,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [loading, session, profile]
+    [loading, profileLoading, session, profile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

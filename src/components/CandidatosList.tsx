@@ -42,8 +42,10 @@ export default function CandidatosList({
         .split(",")
         .map((c) => c.trim())
         .filter((c) => c !== ""),
-      cpf_mascarado: "048.***.***-33",
-      contato_mascarado: "(48) 9****-9012",
+      // Sem PII real coletada no cadastro manual — evita atribuir o mesmo
+      // CPF/contato fixo a todos os novos candidatos (dado enganoso).
+      cpf_mascarado: "—",
+      contato_mascarado: "—",
     });
 
     // Reset

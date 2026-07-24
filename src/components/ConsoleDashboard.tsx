@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Vaga } from "../types";
-import { entityPill } from "../lib/entityTheme";
+import { entityPill, entityTheme } from "../lib/entityTheme";
 import { Briefcase, Users, Clock, CheckCircle2, Search, BarChart3, Building } from "lucide-react";
 
 interface ConsoleDashboardProps {
   vagas: Vaga[];
   candidatosCount: number;
+  appliedMap: Record<string, string[]>;
 }
 
-export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDashboardProps) {
+export default function ConsoleDashboard({ vagas, candidatosCount, appliedMap }: ConsoleDashboardProps) {
   const [selectedEntidade, setSelectedEntidade] = useState<string>("TODAS");
   const [selectedRegional, setSelectedRegional] = useState<string>("TODAS");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -25,14 +26,16 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
     return matchesEntidade && matchesRegional && matchesSearch;
   });
 
-  // Funnel data
-  const funnelData = [
-    { etapa: "Inscritos (Atração)", count: 120, pct: 100, color: "bg-blue-600" },
-    { etapa: "Triagem por Competências", count: 85, pct: 71, color: "bg-indigo-600" },
-    { etapa: "Testes & Cases Técnicos", count: 42, pct: 35, color: "bg-purple-600" },
-    { etapa: "Entrevistas Técnicas", count: 18, pct: 15, color: "bg-pink-600" },
-    { etapa: "Homologados/Aprovados", count: 6, pct: 5, color: "bg-emerald-600" }
-  ];
+  // KPIs reais derivados dos dados carregados.
+  const vagasAbertas = vagas.filter((v) => v.status === "Aberta").length;
+  const candidaturasCount = Object.values(appliedMap).reduce((sum, arr) => sum + arr.length, 0);
+
+  // Distribuição real de processos por entidade (substitui o funil de números fixos).
+  const entidadeDist = (["SENAI", "SESI", "IEL", "FIESC"] as const)
+    .map((ent) => ({ entidade: ent, count: vagas.filter((v) => v.entidade === ent).length }))
+    .filter((d) => d.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const maxEntidade = Math.max(1, ...entidadeDist.map((d) => d.count));
 
   return (
     <div className="space-y-6 animate-fadeIn" id="console_dashboard_view">
@@ -65,9 +68,9 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
         {/* KPI 3 */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center justify-between hover:shadow-md transition">
           <div className="space-y-1.5">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tempo de Contratação</span>
-            <span className="text-2xl font-extrabold text-slate-950">18 dias</span>
-            <span className="text-[10px] text-emerald-600 font-bold block">↓ 4 dias vs meta Benner</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Vagas Abertas</span>
+            <span className="text-2xl font-extrabold text-slate-950">{vagasAbertas}</span>
+            <span className="text-[10px] text-slate-500 font-medium block">de {vagas.length} publicadas</span>
           </div>
           <div className="bg-amber-50 text-amber-700 p-3.5 rounded-xl border border-amber-100">
             <Clock className="w-6 h-6" />
@@ -77,9 +80,9 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
         {/* KPI 4 */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center justify-between hover:shadow-md transition">
           <div className="space-y-1.5">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Taxa de Efetividade</span>
-            <span className="text-2xl font-extrabold text-slate-950">94.2%</span>
-            <span className="text-[10px] text-slate-500 font-medium block">Sem interposição de recursos</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Candidaturas</span>
+            <span className="text-2xl font-extrabold text-slate-950">{candidaturasCount}</span>
+            <span className="text-[10px] text-slate-500 font-medium block">Vínculos candidato–vaga</span>
           </div>
           <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl border border-emerald-100">
             <CheckCircle2 className="w-6 h-6" />
@@ -90,43 +93,43 @@ export default function ConsoleDashboard({ vagas, candidatosCount }: ConsoleDash
       {/* Main Grid: Funnel Chart and Processes Table */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Funnel Conversion Panel */}
+        {/* Distribuição real de processos por entidade */}
         <div className="lg:col-span-5 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
               <BarChart3 className="w-5 h-5 text-blue-700" />
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Funil de Conversão ATS</h3>
-            </div>
-            
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-[11px] text-slate-600 leading-relaxed mb-4">
-              Visão consolidada de conversão por etapa técnica no Sistema FIESC.
-              {/* integrar com API Benner RH via REST/OAuth2 aqui */}
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Processos por Entidade</h3>
             </div>
 
-            <div className="space-y-4">
-              {funnelData.map((stage) => (
-                <div key={stage.etapa} className="space-y-1.5">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-slate-700">{stage.etapa}</span>
-                    <span className="font-mono text-slate-500">
-                      <strong>{stage.count}</strong> cands ({stage.pct}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-6 rounded-lg overflow-hidden flex">
-                    <div
-                      className={`${stage.color} h-full text-white text-[9px] font-bold flex items-center pl-2 transition-all duration-500`}
-                      style={{ width: `${stage.pct}%` }}
-                    >
-                      {stage.pct >= 15 ? `${stage.pct}%` : ""}
+            {entidadeDist.length === 0 ? (
+              <p className="text-xs text-slate-400 py-8 text-center">Nenhuma vaga cadastrada ainda.</p>
+            ) : (
+              <div className="space-y-4">
+                {entidadeDist.map((d) => {
+                  const pct = Math.round((d.count / vagas.length) * 100);
+                  return (
+                    <div key={d.entidade} className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-slate-700">{d.entidade}</span>
+                        <span className="font-mono text-slate-500">
+                          <strong>{d.count}</strong> {d.count === 1 ? "vaga" : "vagas"} ({pct}%)
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-6 rounded-lg overflow-hidden">
+                        <div
+                          className={`${entityTheme(d.entidade).accentBg} h-full transition-all duration-500`}
+                          style={{ width: `${Math.round((d.count / maxEntidade) * 100)}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="pt-4 border-t border-slate-100 mt-4 text-[10px] text-slate-400">
-            * Dados de fomento integrados à Federação das Indústrias do Estado de Santa Catarina.
+            Distribuição calculada a partir das vagas ativas no sistema.
           </div>
         </div>
 

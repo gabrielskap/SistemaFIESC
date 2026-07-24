@@ -14,6 +14,8 @@ export interface Profile {
 export interface AuthContextValue {
   /** Sessão ainda sendo resolvida (getSession inicial). */
   loading: boolean;
+  /** Profile (papel/entidade) ainda sendo carregado após a sessão. */
+  profileLoading: boolean;
   /** true quando o Supabase não está configurado — o gate de login fica inativo. */
   authDisabled: boolean;
   session: Session | null;

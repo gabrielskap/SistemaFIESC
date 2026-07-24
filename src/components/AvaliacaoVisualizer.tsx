@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Avaliacao, Candidato, Vaga } from "../types";
 import { CheckCircle2, XCircle, ShieldCheck, Mail, Copy, Check, FileJson, FileText, Sparkles, AlertOctagon } from "lucide-react";
+import { apiFetch } from "../lib/apiFetch";
 
 interface AvaliacaoVisualizerProps {
   avaliacao: Avaliacao;
@@ -71,7 +72,7 @@ export default function AvaliacaoVisualizer({ avaliacao, candidato, vaga }: Aval
     setIsGeneratingMessage(true);
     setGeneratedMessage(null);
     try {
-      const response = await fetch("/api/generate-message", {
+      const response = await apiFetch("/api/generate-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -140,7 +141,7 @@ export default function AvaliacaoVisualizer({ avaliacao, candidato, vaga }: Aval
       </div>
 
       {/* Alertas Éticos / Discriminação (Principle 2) */}
-      {(avaliacao.possivel_alerta_discriminacao || vaga.id === "vaga_discriminatoria_teste" || candidato.id === "cand_discriminatorio_teste") && (
+      {avaliacao.possivel_alerta_discriminacao && (
         <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
           <AlertOctagon className="w-5 h-5 text-rose-600 shrink-0 mt-0.5 animate-bounce" />
           <div className="text-xs text-rose-800">
