@@ -1,4 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * Server-side Supabase client usando a SERVICE ROLE.
